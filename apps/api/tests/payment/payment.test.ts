@@ -199,7 +199,7 @@ function balanced(lines: ReturnType<typeof issueLines>) {
 
 describe('invoice amounts and ledger', () => {
   it('issues 400 cents with no tax when TAX_MODE is none', () => {
-    const amounts = computeInvoiceAmounts(0, 'none');
+    const amounts = computeInvoiceAmounts(0, 1, 'none');
     expect(amounts.subtotalCents).toBe(COMMISSION_AMOUNT_CENTS);
     expect(amounts.commissionCents).toBe(400);
     expect(amounts.fareCents).toBe(0);
@@ -209,7 +209,7 @@ describe('invoice amounts and ledger', () => {
   });
 
   it('adds the ride fare to the subtotal and taxes commission only', () => {
-    const amounts = computeInvoiceAmounts(2000, 'gst');
+    const amounts = computeInvoiceAmounts(2000, 1, 'gst');
     expect(amounts.fareCents).toBe(2000);
     expect(amounts.commissionCents).toBe(400);
     expect(amounts.subtotalCents).toBe(2400);
@@ -217,11 +217,20 @@ describe('invoice amounts and ledger', () => {
     expect(amounts.totalCents).toBe(2420);
   });
 
+  it('scales the commission with seats, discounting 25% at 3+ seats', () => {
+    const twoSeats = computeInvoiceAmounts(0, 2, 'none');
+    expect(twoSeats.commissionCents).toBe(800);
+    const threeSeats = computeInvoiceAmounts(0, 3, 'none');
+    expect(threeSeats.commissionCents).toBe(900); // 3 * 400 * 0.75
+    const fiveSeats = computeInvoiceAmounts(0, 5, 'none');
+    expect(fiveSeats.commissionCents).toBe(1500); // 5 * 400 * 0.75
+  });
+
   it('adds TPS 5 % and TVQ 9,975 % on the commission', () => {
-    const gst = computeInvoiceAmounts(0, 'gst');
+    const gst = computeInvoiceAmounts(0, 1, 'gst');
     expect(gst.taxCents).toBe(20);
     expect(gst.totalCents).toBe(420);
-    const both = computeInvoiceAmounts(0, 'gst_qst');
+    const both = computeInvoiceAmounts(0, 1, 'gst_qst');
     expect(both.taxLines).toEqual([
       { code: 'gst', label: 'TPS', rate: 0.05, amountCents: 20 },
       { code: 'qst', label: 'TVQ', rate: 0.09975, amountCents: 40 },

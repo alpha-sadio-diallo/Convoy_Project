@@ -205,7 +205,9 @@ export function TrajetBookingForm({
         const fare =
           typeof pricePerSeat === 'number' ? Math.round(pricePerSeat * 100) * booking.seats : null;
         const due =
-          fare !== null ? payableCents(booking.invoiceTotalCents, booking.paymentMethod, fare) : null;
+          fare !== null
+            ? payableCents(booking.invoiceTotalCents, booking.paymentMethod, fare, booking.seats)
+            : null;
         const payAmount =
           booking.status === 'awaiting_payment' && due !== null ? formatCad(due, locale) : null;
         return (
@@ -315,7 +317,7 @@ function NewBookingFields({
         <legend className="text-sm text-muted-foreground">{t('booking.methodLabel')}</legend>
         {offered.map((methodOption) => {
           const fareCents = typeof pricePerSeat === 'number' ? Math.round(pricePerSeat * 100) * seats : 0;
-          const payNow = formatCad(koubyDueCents(methodOption, fareCents), locale);
+          const payNow = formatCad(koubyDueCents(methodOption, fareCents, seats), locale);
           const fare = formatCad(fareCents, locale);
           const selected = paymentMethod === methodOption;
           return (

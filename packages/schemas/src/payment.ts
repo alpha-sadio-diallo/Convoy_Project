@@ -14,6 +14,18 @@ import {
 export const COMMISSION_AMOUNT_CENTS = 400;
 export const COMMISSION_CURRENCY = 'cad';
 
+/** From this many seats booked on one trajet, the per-seat commission is discounted. */
+export const COMMISSION_SEAT_DISCOUNT_THRESHOLD = 3;
+export const COMMISSION_SEAT_DISCOUNT_RATE = 0.25;
+
+/** Commission scales with seats booked; 25% off the total once 3+ seats are booked. */
+export function commissionCentsForSeats(seats: number): number {
+  const base = COMMISSION_AMOUNT_CENTS * seats;
+  return seats >= COMMISSION_SEAT_DISCOUNT_THRESHOLD
+    ? Math.round(base * (1 - COMMISSION_SEAT_DISCOUNT_RATE))
+    : base;
+}
+
 export const GST_RATE = 0.05;
 export const QST_RATE = 0.09975;
 
@@ -53,14 +65,14 @@ export function roundTaxCents(baseCents: number, rate: number): number {
   return Math.round(baseCents * rate);
 }
 
-export function commissionTaxLines(mode: TaxMode): TaxLine[] {
+export function commissionTaxLines(mode: TaxMode, commissionCents: number = COMMISSION_AMOUNT_CENTS): TaxLine[] {
   const lines: TaxLine[] = [];
   if (mode === 'gst' || mode === 'gst_qst') {
     lines.push({
       code: 'gst',
       label: 'TPS',
       rate: GST_RATE,
-      amountCents: roundTaxCents(COMMISSION_AMOUNT_CENTS, GST_RATE),
+      amountCents: roundTaxCents(commissionCents, GST_RATE),
     });
   }
   if (mode === 'gst_qst') {
@@ -68,14 +80,14 @@ export function commissionTaxLines(mode: TaxMode): TaxLine[] {
       code: 'qst',
       label: 'TVQ',
       rate: QST_RATE,
-      amountCents: roundTaxCents(COMMISSION_AMOUNT_CENTS, QST_RATE),
+      amountCents: roundTaxCents(commissionCents, QST_RATE),
     });
   }
   return lines;
 }
 
-export function commissionTaxCents(mode: TaxMode): number {
-  return commissionTaxLines(mode).reduce((sum, line) => sum + line.amountCents, 0);
+export function commissionTaxCents(mode: TaxMode, commissionCents: number = COMMISSION_AMOUNT_CENTS): number {
+  return commissionTaxLines(mode, commissionCents).reduce((sum, line) => sum + line.amountCents, 0);
 }
 
 export const InvoiceSchema = z

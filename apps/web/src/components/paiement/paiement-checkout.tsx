@@ -210,7 +210,9 @@ export function PaiementCheckout({ bookingId }: { bookingId: string }) {
 
   if (!invoice) {
     const pendingTotal =
-      booking != null ? formatCad(koubyDueCents(booking.paymentMethod, booking.fareCents), locale) : null;
+      booking != null
+        ? formatCad(koubyDueCents(booking.paymentMethod, booking.fareCents, booking.seats), locale)
+        : null;
     return (
       <Card>
         <CardContent className="grid gap-4 px-6 pb-6 pt-6">

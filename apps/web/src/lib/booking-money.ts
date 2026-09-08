@@ -1,20 +1,22 @@
 import {
   COMMISSION_AMOUNT_CENTS,
   PRODUCT_TAX_MODE,
+  commissionCentsForSeats,
   commissionTaxCents,
   type RidePaymentMethod,
 } from '@carpool/schemas';
 
 export { COMMISSION_AMOUNT_CENTS };
 
-/** Commission + Quebec tax, without the ride fare. */
-export function koubyFeeCents(): number {
-  return COMMISSION_AMOUNT_CENTS + commissionTaxCents(PRODUCT_TAX_MODE);
+/** Commission + Quebec tax for the given seat count, without the ride fare. */
+export function koubyFeeCents(seats = 1): number {
+  const commissionCents = commissionCentsForSeats(seats);
+  return commissionCents + commissionTaxCents(PRODUCT_TAX_MODE, commissionCents);
 }
 
 /** Amount Kouby charges now: fare + commission + tax on card, commission + tax otherwise. */
-export function koubyDueCents(method: RidePaymentMethod, fareCents: number): number {
-  const koubyCents = koubyFeeCents();
+export function koubyDueCents(method: RidePaymentMethod, fareCents: number, seats = 1): number {
+  const koubyCents = koubyFeeCents(seats);
   return method === 'card' ? fareCents + koubyCents : koubyCents;
 }
 
@@ -23,8 +25,9 @@ export function payableCents(
   invoiceTotalCents: number | null | undefined,
   method: RidePaymentMethod,
   fareCents: number,
+  seats = 1,
 ): number {
-  return invoiceTotalCents ?? koubyDueCents(method, fareCents);
+  return invoiceTotalCents ?? koubyDueCents(method, fareCents, seats);
 }
 
 /** Ride fare still owed to the driver after the Kouby charge (Interac/cash). */

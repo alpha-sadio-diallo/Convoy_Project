@@ -362,7 +362,7 @@ function BookingRow({
   const t = useTranslations('MesReservations');
   const tRide = useTranslations('Trajet');
   const locale = useLocale();
-  const due = payableCents(item.invoiceTotalCents, item.paymentMethod, item.fareCents);
+  const due = payableCents(item.invoiceTotalCents, item.paymentMethod, item.fareCents, item.seats);
   const driverDue = driverFareCents(item.paymentMethod, item.fareCents);
   const name = driverLabel(item);
   const departed = new Date(item.trajet.departureDateTime) < new Date();

@@ -1,0 +1,26 @@
+appId: com.carpool.mobile
+---
+# Passenger flow: sign in, search a route, open the first result.
+# Requires seed data with at least one published, non-cancelled trajet between
+# MAESTRO_SEARCH_DEPARTURE_CITY and MAESTRO_SEARCH_DESTINATION_CITY (see
+# .maestro/README.md) — this flow does not create that data itself.
+- runFlow: sign-in.yaml
+- tapOn:
+    id: 'search-departure-city'
+- inputText: ${MAESTRO_SEARCH_DEPARTURE_CITY}
+- tapOn:
+    id: 'search-destination-city'
+- inputText: ${MAESTRO_SEARCH_DESTINATION_CITY}
+- tapOn:
+    id: 'search-submit'
+- tapOn:
+    id: 'search-result-item'
+    index: 0
+# `booking-seats` only renders for a signed-in passenger who isn't already
+# booked on this trajet and isn't its owner (see BookingSection in
+# app/trajets/[id].tsx) — `optional: true` so this flow still passes against
+# a seed trajet the test account already booked in a previous run.
+- assertVisible:
+    id: 'booking-seats'
+    timeout: 15000
+    optional: true

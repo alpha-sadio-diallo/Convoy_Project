@@ -1,0 +1,22 @@
+appId: com.carpool.mobile
+---
+# Driver flow: sign in, open one of the driver's own published trajets, start
+# live location sharing. Reuses sign-in.yaml — pass a DRIVER account's
+# credentials as MAESTRO_TEST_EMAIL / MAESTRO_TEST_PASSWORD when running this
+# flow specifically (see .maestro/README.md), since the driver test account
+# is not necessarily the same as the passenger one used elsewhere.
+- runFlow: sign-in.yaml
+- tapOn: 'Mes trajets'
+- tapOn:
+    id: 'my-trajet-item'
+    index: 0
+- tapOn:
+    id: 'live-location-toggle'
+# Foreground location permission dialog — text/id vary by OS and by whether
+# it's already been granted from a previous run, hence optional.
+- tapOn:
+    text: 'Allow|While using the app|OK|Autoriser'
+    optional: true
+- assertVisible:
+    text: 'En direct'
+    optional: true

@@ -245,9 +245,16 @@ export async function createStripeCustomer(input: {
 }
 
 export async function createStripeSetupIntent(customerId: string): Promise<string> {
+  // Same "No valid payment method types" failure mode as
+  // buildPaymentIntentParams above: `usage: 'off_session'` restricts
+  // automatic_payment_methods resolution to methods that support off-session
+  // reuse, which can intersect down to an empty set. Force the explicit
+  // fallback list rather than letting Stripe auto-resolve.
+  const paymentMethodTypes =
+    env.STRIPE_PAYMENT_METHOD_TYPES.length > 0 ? env.STRIPE_PAYMENT_METHOD_TYPES : PAYMENT_METHOD_TYPES_FALLBACK;
   const intent = await stripe().setupIntents.create({
     customer: customerId,
-    automatic_payment_methods: { enabled: true },
+    payment_method_types: paymentMethodTypes,
     usage: 'off_session',
   });
   if (!intent.client_secret) throw new Error('Stripe SetupIntent is missing a client secret');

@@ -298,7 +298,7 @@ function BookingSection({
   const bookMutation = useMutation({
     mutationFn: async () => {
       if (!paymentMethod) throw new Error('Choisissez un moyen de paiement.');
-      const seatsNumber = Math.max(1, Math.min(seatsAvailable, Number(seats) || 1));
+      const seatsNumber = Number(seats) || 1;
       const res = await api.trajets[':id'].book.$post({
         param: { id: trajetId },
         json: { seats: seatsNumber, paymentMethod },
@@ -381,7 +381,22 @@ function BookingSection({
         </>
       ) : (
         <>
-          <TextField label={t('trajetDetail.bookingSection.seatsLabel')} value={seats} onChangeText={setSeats} keyboardType="number-pad" />
+          <TextField
+            testID="booking-seats"
+            label={t('trajetDetail.bookingSection.seatsLabel')}
+            value={seats}
+            onChangeText={(text) => {
+              const digits = text.replace(/[^0-9]/g, '');
+              if (digits === '') {
+                setSeats('');
+                return;
+              }
+              const clamped = Math.min(Math.max(1, Number(digits)), seatsAvailable);
+              setSeats(String(clamped));
+            }}
+            onBlur={() => setSeats((current) => (current === '' ? '1' : current))}
+            keyboardType="number-pad"
+          />
           {paymentMethods.length > 0 ? (
             <View>
               <Text style={styles.label}>{t('trajetDetail.bookingSection.paymentMethodLabel')}</Text>
@@ -389,6 +404,7 @@ function BookingSection({
                 {paymentMethods.map((method) => (
                   <Button
                     key={method}
+                    testID={`payment-method-${method}`}
                     label={t(PAYMENT_METHOD_LABEL_KEYS[method])}
                     size="sm"
                     variant={paymentMethod === method ? 'primary' : 'outline'}
@@ -399,6 +415,7 @@ function BookingSection({
             </View>
           ) : null}
           <Button
+            testID="booking-submit"
             label={bookMutation.isPending ? t('trajetDetail.bookingSection.booking') : t('trajetDetail.bookingSection.book')}
             disabled={bookMutation.isPending || !paymentMethod}
             onPress={() => bookMutation.mutate()}

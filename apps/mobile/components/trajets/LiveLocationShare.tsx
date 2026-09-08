@@ -27,9 +27,16 @@ export function LiveLocationShare({ trajetId, cancelled }: { trajetId: string; c
 
       <View style={styles.row}>
         {isSharing ? (
-          <Button label={t('liveLocationShare.stopSharing')} variant="outline" size="sm" onPress={stop} />
+          <Button
+            testID="live-location-toggle"
+            label={t('liveLocationShare.stopSharing')}
+            variant="outline"
+            size="sm"
+            onPress={stop}
+          />
         ) : (
           <Button
+            testID="live-location-toggle"
             label={status === 'requesting' ? t('liveLocationShare.starting') : t('liveLocationShare.startSharing')}
             variant="primary"
             size="sm"

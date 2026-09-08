@@ -158,7 +158,7 @@ export default function PaiementScreen() {
             </Text>
             {booking ? (
               <Text style={styles.amount}>
-                {formatCad(payableCents(null, booking.paymentMethod, booking.fareCents), locale)}
+                {formatCad(payableCents(null, booking.paymentMethod, booking.fareCents, booking.seats), locale)}
               </Text>
             ) : null}
           </Card>

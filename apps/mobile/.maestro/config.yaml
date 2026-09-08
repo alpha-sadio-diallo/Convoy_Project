@@ -1,0 +1,3 @@
+# Maestro workspace config — shared by every flow under .maestro/flows/.
+# See .maestro/README.md for how to install Maestro and run these.
+appId: com.carpool.mobile

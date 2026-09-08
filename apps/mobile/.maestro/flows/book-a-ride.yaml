@@ -1,0 +1,18 @@
+appId: com.carpool.mobile
+---
+# Passenger flow: search, open a trajet, pick a payment method, submit a
+# booking request. Stops at the request (status usually goes to `pending` or
+# `awaiting_payment` — see BookingSection in app/trajets/[id].tsx) rather than
+# completing an actual Stripe payment: driving the native Stripe payment sheet
+# from Maestro needs its own test-mode setup and is out of scope here.
+- runFlow: search-and-view-trajet.yaml
+- tapOn:
+    id: 'booking-seats'
+- eraseText
+- inputText: '1'
+# Whichever payment method the trajet offers first — id is a regex match.
+- tapOn:
+    id: 'payment-method-.*'
+    optional: true
+- tapOn:
+    id: 'booking-submit'

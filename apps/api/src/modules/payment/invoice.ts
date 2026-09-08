@@ -77,6 +77,7 @@ export async function issueInvoiceForBooking(
     id: string;
     paymentMethod?: string | null;
     fareCents?: number | null;
+    seats: number;
     firstName: string | null;
     lastName: string | null;
     email: string | null;
@@ -87,7 +88,7 @@ export async function issueInvoiceForBooking(
   if (existing) return serializeInvoice(existing);
 
   const fareCents = bookingRow.paymentMethod === 'card' ? (bookingRow.fareCents ?? 0) : 0;
-  const amounts = computeInvoiceAmounts(fareCents);
+  const amounts = computeInvoiceAmounts(fareCents, bookingRow.seats);
   const now = new Date();
   const seq = await nextSequenceValue(tx, 'invoice_number_seq');
   const id = randomUUID();

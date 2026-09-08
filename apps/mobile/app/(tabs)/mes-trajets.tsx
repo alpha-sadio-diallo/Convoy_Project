@@ -37,7 +37,7 @@ export default function MesTrajetsScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
-            <Pressable onPress={() => router.push(`/trajets/${item.id}`)}>
+            <Pressable testID="my-trajet-item" onPress={() => router.push(`/trajets/${item.id}`)}>
               <TrajetCard trajet={item} />
             </Pressable>
           )}

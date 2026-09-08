@@ -1,0 +1,17 @@
+appId: com.carpool.mobile
+---
+# Signs a passenger test account in and confirms the search tab loads.
+# Requires MAESTRO_TEST_EMAIL / MAESTRO_TEST_PASSWORD (see .maestro/README.md).
+- launchApp:
+    clearState: true
+- tapOn:
+    id: 'sign-in-email'
+- inputText: ${MAESTRO_TEST_EMAIL}
+- tapOn:
+    id: 'sign-in-password'
+- inputText: ${MAESTRO_TEST_PASSWORD}
+- tapOn:
+    id: 'sign-in-submit'
+- assertVisible:
+    id: 'search-departure-city'
+    timeout: 15000

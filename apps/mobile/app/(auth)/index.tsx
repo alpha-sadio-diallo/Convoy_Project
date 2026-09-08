@@ -59,6 +59,7 @@ export default function SignInScreen() {
         ) : (
           <View style={styles.form}>
             <TextField
+              testID="sign-in-email"
               label={t('auth.signIn.emailLabel')}
               value={email}
               onChangeText={setEmail}
@@ -67,6 +68,7 @@ export default function SignInScreen() {
               autoComplete="email"
             />
             <TextField
+              testID="sign-in-password"
               label={t('auth.signIn.passwordLabel')}
               value={password}
               onChangeText={setPassword}
@@ -75,6 +77,7 @@ export default function SignInScreen() {
             />
             {error ? <Text style={styles.error}>{error}</Text> : null}
             <Button
+              testID="sign-in-submit"
               label={loading ? t('auth.signIn.submitting') : t('auth.signIn.submit')}
               onPress={handleSubmit}
               loading={loading}

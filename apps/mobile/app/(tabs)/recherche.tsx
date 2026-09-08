@@ -93,11 +93,13 @@ export default function RechercheScreen() {
     <ScreenContainer>
       <View style={styles.form}>
         <TextField
+          testID="search-departure-city"
           label={t('recherche.departureCity')}
           value={filters.departureCity}
           onChangeText={(v) => updateFilter('departureCity', v)}
         />
         <TextField
+          testID="search-destination-city"
           label={t('recherche.destinationCity')}
           value={filters.destinationCity}
           onChangeText={(v) => updateFilter('destinationCity', v)}
@@ -159,7 +161,7 @@ export default function RechercheScreen() {
           ))}
         </View>
 
-        <Button label={t('recherche.submit')} onPress={applyFilters} />
+        <Button testID="search-submit" label={t('recherche.submit')} onPress={applyFilters} />
       </View>
 
       {isLoading ? <LoadingState label={t('recherche.loading')} /> : null}
@@ -172,7 +174,7 @@ export default function RechercheScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
-            <Pressable onPress={() => router.push(`/trajets/${item.id}`)}>
+            <Pressable testID="search-result-item" onPress={() => router.push(`/trajets/${item.id}`)}>
               <TrajetCard trajet={item} />
             </Pressable>
           )}

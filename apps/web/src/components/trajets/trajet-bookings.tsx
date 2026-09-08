@@ -45,7 +45,7 @@ function queueAmountCents(booking: DriverBooking): number {
   if (booking.paymentMethod !== 'card' || booking.status === 'confirmed') {
     return booking.fareCents;
   }
-  return payableCents(booking.invoiceTotalCents, booking.paymentMethod, booking.fareCents);
+  return payableCents(booking.invoiceTotalCents, booking.paymentMethod, booking.fareCents, booking.seats);
 }
 
 function sortDriverBookings(items: DriverBooking[]) {
@@ -440,7 +440,7 @@ function DriverBookingCard({
   const t = useTranslations('Trajets');
   const tRide = useTranslations('Trajet');
   const passengerPays = formatCad(
-    payableCents(booking.invoiceTotalCents, booking.paymentMethod, booking.fareCents),
+    payableCents(booking.invoiceTotalCents, booking.paymentMethod, booking.fareCents, booking.seats),
     locale,
   );
   const driverGets = formatCad(booking.fareCents, locale);

@@ -40,13 +40,13 @@ The app is on Expo SDK 56 / React Native 0.85, where the New Architecture is man
 5. Android production builds must ship as `.aab` (Play Console requirement) — the `production` profile already defaults to that; only `preview` is forced to `.apk` for easier internal sideloading.
 6. Once step 1–2 are done, **`EAS Update`** is worth turning on for JS-only fixes — it covers most of §10's "maintenance corrective" without a full store re-submission. Native-module changes (new packages, permission changes) still require a full build + store review.
 
-## 5. Store privacy compliance — ties directly to §7 (PIPEDA / Loi 25)
+## 5. Store privacy compliance — ties directly to §7 (PIPEDA / Loi 25) — ✅ mapping done, submission still on you
 
-Both stores now enforce this at review time, not just as a policy formality:
-- **Apple**: App Privacy "nutrition label" in App Store Connect must accurately list data collected (location, payment info, identity documents, messages) and whether it's linked to the user — this has to match what `Privacy` copy already describes in `apps/web/messages/*.json`, not be filled in generically.
-- **Google Play**: the Data Safety section has the equivalent requirement.
-- **Background location**: the app already has a driver-side live-location-share feature (`apps/web/src/hooks/use-live-location-share.ts`, mirrored by `apps/mobile/lib/tracking.ts`). Both stores scrutinize background-location permission requests closely in 2026 — the in-app permission prompt and the store privacy disclosure need to say the same thing ("shared with confirmed passengers only, during an active trip"), or review gets rejected/delayed.
-- This is the mobile-side twin of what `docs/requirements-specification-audit.md` already flagged as PIPEDA compliance being the weakest area (40% at audit time, `main`-scoped) — the mobile app inherits that gap and should not be treated as a separate compliance surface.
+Full data-collection mapping for both stores' privacy declarations now lives in `docs/mobile-store-privacy-declarations.md`, built from actually reading what the mobile app collects (not a generic template): account info, driver's licence + profile photo, **foreground-only** live location (confirmed not background — `Location.requestForegroundPermissionsAsync()`, no "Always" permission anywhere), payment via Stripe/PayPal, messages, and the new push token. It also confirms no analytics/ads/crash-reporting SDK ships in the mobile bundle today, so **no Apple ATT prompt is needed**.
+
+Both stores' forms are filled in their own consoles (App Store Connect / Play Console) — that part can't be done from this repo, hence the separate doc rather than more code. One follow-up flagged there: the mobile document-upload screen (`apps/mobile/app/(tabs)/documents.tsx`, strings in `lib/i18n/messages/{fr,en}.ts`) has no "why we ask for this" copy today, just functional labels — worth adding before submission so the in-app disclosure matches the declared purpose.
+
+This is the mobile-side twin of what `docs/requirements-specification-audit.md` already flagged as PIPEDA compliance being the weakest area (40% at audit time, `main`-scoped) — the mapping closes the "what do we even collect" question; the actual console submission and privacy-policy legal review are still open.
 
 ## 6. Already following current best practice — no action needed
 
@@ -54,9 +54,13 @@ Both stores now enforce this at review time, not just as a policy formality:
 - **New Architecture**: `app.json` has `"newArchEnabled": true`, matching SDK 56's mandatory default.
 - **Monorepo code-sharing**: `@carpool/schemas` and `@carpool/api-client` are shared between `apps/web` and `apps/mobile`, which is the right structure for keeping the two clients in sync as the API evolves — worth preserving as a hard rule for any new feature (add the type/schema once in `packages/schemas`, not per-app).
 
-## 7. Testing — not yet covered
+## 7. Testing — ✅ Maestro scaffolded, unverified in this environment
 
-Nothing under `apps/mobile` currently runs E2E tests against the New Architecture build. For a payments + live-location app, **Maestro** (simpler YAML flows, good New Architecture support, no need for a full Detox native rebuild per change) is the more current recommendation over Detox for a small team; worth scoping into the "Tests & corrections" phase (§11, 4 weeks budgeted) rather than deferring to post-launch.
+`apps/mobile/.maestro/` now has four flows — sign-in, search + view a trajet, submit a booking request, and driver-side live location sharing — plus a `test:e2e` script. They select elements by `testID` (added to the relevant screens: `app/(auth)/index.tsx`, `app/(tabs)/recherche.tsx`, `app/(tabs)/mes-trajets.tsx`, `app/trajets/[id].tsx`, `components/trajets/LiveLocationShare.tsx`) rather than visible text, since the app's copy is bilingual and a text selector would break on an English-locale device.
+
+**Honest caveat**: there was no Maestro CLI, no emulator/device, and no seeded test backend in this environment, so these flows were written against the actual screen code (verified structure and copy) but **never actually run**. `apps/mobile/.maestro/README.md` has the full prerequisites (dev build, not Expo Go; seeded passenger + driver test accounts; at least one bookable trajet) and exact commands — treat this as a starting point to run and fix up, not a passing suite. First real run will likely need a couple of selector tweaks once you see it against a live app.
+
+Not covered: messaging, reviews, document upload, sign-up. The `testID` pattern is established — extending coverage is now mostly "find the screen, add a `testID`, write the flow" rather than a new setup.
 
 ---
 
@@ -67,8 +71,8 @@ Nothing under `apps/mobile` currently runs E2E tests against the New Architectur
 | Pin `react-native-worklets` version | Small | ✅ Done |
 | `eas.json` + EAS Submit scaffolding | Medium | ✅ Config done — needs your `eas login` / `eas init` / store credentials |
 | Push notifications (`expo-notifications`) | Medium | ✅ Implemented end-to-end — needs `eas init` (same step as above) before tokens can register |
-| Align store privacy labels with in-app disclosures | Small–Medium | Open — store review blocker, closes part of the PIPEDA/Loi 25 gap |
-| Maestro E2E on core flows (booking, payment, live tracking) | Medium | Open — no mobile test coverage today |
+| Align store privacy labels with in-app disclosures | Small–Medium | ✅ Data mapping written (`docs/mobile-store-privacy-declarations.md`) — actual console submission still on you |
+| Maestro E2E on core flows (booking, payment, live tracking) | Medium | ✅ Scaffolded (4 flows + `testID`s) — unverified, no CLI/emulator/seed data available here |
 | SDK 57 upgrade | Small, not urgent | Open |
 
 ---
